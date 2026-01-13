@@ -1,0 +1,23 @@
+nav {
+  display: flex;
+  justify-content: space-around;
+  background-color: #333;
+  padding: 10px 0;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.nav-link:hover {
+  background-color: #575757;
+}
+
+.nav-link.active {
+  background-color: #007bff;
+  font-weight: bold;
+}
