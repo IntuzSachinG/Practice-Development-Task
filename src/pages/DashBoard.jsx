@@ -23,15 +23,18 @@ const Dashboard = () => {
   );
 
   const filteredAndSortedTasks = useMemo(() => {
-    let filteredTasks = tasks;
-
-    if (priorityFilter !== "All") {
-      filteredTasks = tasks.filter((task) => task.priority === priorityFilter);
-    }
-
     const priorityOrder = { Low: 1, Medium: 2, High: 3 };
 
-    return [...filteredTasks].sort((a, b) => {
+    if (priorityFilter === "All") {
+      return [...tasks].sort(
+        (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]
+      );
+    }
+
+    return [...tasks].sort((a, b) => {
+      if (a.priority === priorityFilter) return -1;
+      if (b.priority === priorityFilter) return 1;
+
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     });
   }, [tasks, priorityFilter]);

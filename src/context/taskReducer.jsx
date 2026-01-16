@@ -14,9 +14,10 @@ export const taskReducer = (state, action) => {
     DELETE_TASK: (state, action) =>
       state.filter((task) => task.id !== action.id),
 
-    TOGGLE_PRIORITY: (state,action) => 
-      state.map((task) => 
-      task.id === action.id ? {...task,priority:action.priority} : task),
+    TOGGLE_PRIORITY: (state, action) =>
+      state.map((task) =>
+        task.id === action.id ? { ...task, priority: action.priority } : task
+      ),
 
     TOGGLE_STATUS: (state, action) =>
       state.map((task) =>
