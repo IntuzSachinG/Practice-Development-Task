@@ -1,14 +1,29 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import {
+  PRIORITY_OPTIONS,
+  STATUS_OPTIONS,
+  TASK_PRIORITY,
+  TASK_STATUS,
+} from "../utils/constants";
 
-const TaskForm = ({ initialValues, validationSchema, onSubmit }) => {
-  const formik = useFormik({
+// !! Reusable form component for add the task and props
+const TaskForm = ({
+  initialValues,
+  validationSchema,
+  onSubmit,
+  submitLabel = "Add Task",
+}) => {
+  // !! Initialize Formik
+  const taskForm = useFormik({
     initialValues: initialValues || {
       title: "",
       description: "",
-      priority: "Low",
-      status: "Pending",
+      priority: TASK_PRIORITY.LOW,
+      status: TASK_STATUS.PENDING,
     },
+
+    // !! Default validation rules
     validationSchema:
       validationSchema ||
       Yup.object({
@@ -19,54 +34,66 @@ const TaskForm = ({ initialValues, validationSchema, onSubmit }) => {
           .min(5, "Description must be at least 5 characters")
           .required("Description is required"),
       }),
-    onSubmit: onSubmit,
+    onSubmit,
   });
 
   return (
-    <form onSubmit={formik.handleSubmit} className="add-task-form">
-      
+    <form onSubmit={taskForm.handleSubmit} className="add-task-form">
+      {/* !!  Task title */}
       <input
         name="title"
         placeholder="Title"
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-        value={formik.values.title}
+        onChange={taskForm.handleChange}
+        onBlur={taskForm.handleBlur}
+        value={taskForm.values.title}
       />
-      {formik.touched.title && formik.errors.title ? (
-        <div className="error-message">{formik.errors.title}</div>
-      ) : null}
 
+      {/* !!  Title validation error */}
+      {taskForm.touched.title && taskForm.errors.title && (
+        <div className="error-message">{taskForm.errors.title}</div>
+      )}
+
+      {/* !!  Task description */}
       <textarea
         name="description"
         placeholder="Description"
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-        value={formik.values.description}
+        onChange={taskForm.handleChange}
+        onBlur={taskForm.handleBlur}
+        value={taskForm.values.description}
       />
-      {formik.touched.description && formik.errors.description ? (
-        <div className="error-message">{formik.errors.description}</div>
-      ) : null}
 
+      {/* !!  Description validation error */}
+
+      {taskForm.touched.description && taskForm.errors.description && (
+        <div className="error-message">{taskForm.errors.description}</div>
+      )}
+
+      {/* !!  Priority selector */}
       <select
         name="priority"
-        onChange={formik.handleChange}
-        value={formik.values.priority}
+        onChange={taskForm.handleChange}
+        value={taskForm.values.priority}
       >
-        <option>Low</option>
-        <option>Medium</option>
-        <option>High</option>
+        {PRIORITY_OPTIONS.map((priority) => (
+          <option key={priority} value={priority}>
+            {priority}
+          </option>
+        ))}
       </select>
-
+      {/* !! Status selector */}
       <select
         name="status"
-        onChange={formik.handleChange}
-        value={formik.values.status}
+        onChange={taskForm.handleChange}
+        value={taskForm.values.status}
       >
-        <option>Pending</option>
-        <option>In Progress</option>
-        <option>Completed</option>
+        {STATUS_OPTIONS.map((status) => (
+          <option key={status} value={status}>
+            {status}
+          </option>
+        ))}
       </select>
-      <button type="submit">Add Task</button>
+
+      <button type="submit">{submitLabel}</button>
     </form>
   );
 };

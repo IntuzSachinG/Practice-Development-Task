@@ -1,7 +1,11 @@
-export const taskReducer = (state, action) => {
+import { ACTION_TYPES } from "../utils/constants";
+
+// !! Reducer for all task-related actions
+export const TaskReducer = (state, action) => {
   const handlers = {
-    ADD_TASK: (state, action) => [...state, action.task],
-    UPDATE_TASK: (state, action) =>
+    [ACTION_TYPES.ADD_TASK]: () => [...state, action.task],
+
+    [ACTION_TYPES.UPDATE_TASK]: () =>
       state.map((task) =>
         task.id === action.task.id
           ? {
@@ -11,21 +15,20 @@ export const taskReducer = (state, action) => {
             }
           : task
       ),
-    DELETE_TASK: (state, action) =>
+
+    [ACTION_TYPES.DELETE_TASK]: () =>
       state.filter((task) => task.id !== action.id),
 
-    TOGGLE_PRIORITY: (state, action) =>
+    [ACTION_TYPES.TOGGLE_PRIORITY]: () =>
       state.map((task) =>
         task.id === action.id ? { ...task, priority: action.priority } : task
       ),
 
-    TOGGLE_STATUS: (state, action) =>
+    [ACTION_TYPES.TOGGLE_STATUS]: () =>
       state.map((task) =>
         task.id === action.id ? { ...task, status: action.status } : task
       ),
   };
 
-  const handler = handlers[action.type] || (() => state);
-
-  return handler(state, action);
+  return handlers[action.type] ? handlers[action.type]() : state;
 };

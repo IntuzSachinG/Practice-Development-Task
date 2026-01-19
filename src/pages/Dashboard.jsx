@@ -1,29 +1,41 @@
 import { useContext, useMemo, useState } from "react";
-import { TaskContext } from "../context/TaskContext";
+import { TaskContext } from "../contexts/TaskContext";
 import TaskList from "../components/TaskList";
-import "../pages/DashBoard.css";
+import { TASK_PRIORITY, TASK_STATUS } from "../utils/constants";
+import "../pages/Dashboard.css";
 
 const Dashboard = () => {
+  // !! Get tasks from global context
   const { tasks } = useContext(TaskContext);
+
+  // !! Selected priority filter (All | Low | Medium | High)
   const [priorityFilter, setPriorityFilter] = useState("All");
 
+  // !! Count completed tasks
   const completedTasks = useMemo(
-    () => tasks.filter((task) => task.status === "Completed"),
+    () => tasks.filter((task) => task.status === TASK_STATUS.COMPLETED),
     [tasks]
   );
 
-  const progressTasks = useMemo(
-    () => tasks.filter((task) => task.status === "In Progress"),
+  // !! Count in-progress tasks
+  const inProgressTasks = useMemo(
+    () => tasks.filter((task) => task.status === TASK_STATUS.IN_PROGRESS),
     [tasks]
   );
 
+  // !! Count pending tasks
   const pendingTasks = useMemo(
-    () => tasks.filter((task) => task.status === "Pending"),
+    () => tasks.filter((task) => task.status === TASK_STATUS.PENDING),
     [tasks]
   );
 
   const filteredAndSortedTasks = useMemo(() => {
-    const priorityOrder = { Low: 1, Medium: 2, High: 3 };
+    // !! Define priority order for sorting
+    const priorityOrder = {
+      [TASK_PRIORITY.LOW]: 1,
+      [TASK_PRIORITY.MEDIUM]: 2,
+      [TASK_PRIORITY.HIGH]: 3,
+    };
 
     if (priorityFilter === "All") {
       return [...tasks].sort(
@@ -34,7 +46,6 @@ const Dashboard = () => {
     return [...tasks].sort((a, b) => {
       if (a.priority === priorityFilter) return -1;
       if (b.priority === priorityFilter) return 1;
-
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     });
   }, [tasks, priorityFilter]);
@@ -42,23 +53,27 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <h2>Dashboard</h2>
+
       <div className="filter-container">
-        <label htmlFor="priority-filter">Filter by Priority: </label>
+        <label>Filter by Priority:</label>
         <select
-          id="priority-filter"
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
         >
           <option value="All">All Priorities</option>
-          <option value="Low">Low</option>
-          <option value="Medium">Medium</option>
-          <option value="High">High</option>
+          {Object.values(TASK_PRIORITY).map((p) => (
+            <option key={p} value={p}>
+              {p}
+            </option>
+          ))}
         </select>
       </div>
 
+      {/* !! Task list */}
       <TaskList tasks={filteredAndSortedTasks} />
+
       <h1>Completed Tasks: {completedTasks.length}</h1>
-      <h2>Progress Tasks: {progressTasks.length}</h2>
+      <h2>Progress Tasks: {inProgressTasks.length}</h2>
       <h3>Pending Tasks: {pendingTasks.length}</h3>
     </div>
   );

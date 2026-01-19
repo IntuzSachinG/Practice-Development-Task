@@ -1,14 +1,22 @@
 // !! Here in this file i remove manual state handling in Taskitem
 
-import { useContext, useCallback, useReducer } from "react";
-import { TaskContext } from "../context/TaskContext";
+import { useCallback, useContext, useReducer } from "react";
+import { TaskContext } from "../contexts/TaskContext";
+import {
+  TASK_STATUS,
+  STATUS_OPTIONS,
+  PRIORITY_OPTIONS,
+  ACTION_TYPES,
+} from "../utils/constants";
 
+// !! Local reducer state for editing mode
 const initialState = {
   isEditing: false,
   editTitle: "",
   editDescription: "",
 };
 
+// !! Handles edit mode state transitions
 function taskEditReducer(state, action) {
   switch (action.type) {
     case "START_EDIT":
@@ -17,20 +25,27 @@ function taskEditReducer(state, action) {
         editTitle: action.payload.title,
         editDescription: action.payload.description,
       };
+
     case "UPDATE_FIELD":
       return { ...state, [action.field]: action.value };
+
     case "CANCEL_EDIT":
     case "SAVE_EDIT":
       return initialState;
+
     default:
       return state;
   }
 }
 
+// !!  Single task card component
 const TaskItem = ({ task }) => {
+  // ??  Global task dispatcher
   const { dispatch } = useContext(TaskContext);
+  // ??   Local reducer for edit mode
   const [editState, dispatchEdit] = useReducer(taskEditReducer, initialState);
 
+  // ??  Start editing task
   const startEditing = useCallback(() => {
     dispatchEdit({
       type: "START_EDIT",
@@ -38,29 +53,42 @@ const TaskItem = ({ task }) => {
     });
   }, [task.title, task.description]);
 
+  // ??  Save edited task
   const handleEditSubmit = (e) => {
     e.preventDefault();
+
     dispatch({
-      type: "UPDATE_TASK",
+      type: ACTION_TYPES.UPDATE_TASK,
       task: {
         id: task.id,
         title: editState.editTitle,
         description: editState.editDescription,
       },
     });
+
     dispatchEdit({ type: "SAVE_EDIT" });
   };
 
+  // ?? Change priority
   const changePriority = useCallback(
     (priority) => {
-      dispatch({ type: "TOGGLE_PRIORITY", id: task.id, priority });
+      dispatch({
+        type: ACTION_TYPES.TOGGLE_PRIORITY,
+        id: task.id,
+        priority,
+      });
     },
     [dispatch, task.id]
   );
 
+  // ??  Change status
   const changeStatus = useCallback(
     (status) => {
-      dispatch({ type: "TOGGLE_STATUS", id: task.id, status });
+      dispatch({
+        type: ACTION_TYPES.TOGGLE_STATUS,
+        id: task.id,
+        status,
+      });
     },
     [dispatch, task.id]
   );
@@ -68,9 +96,9 @@ const TaskItem = ({ task }) => {
   return (
     <div
       className={`task-item ${
-        task.status === "Completed"
+        task.status === TASK_STATUS.COMPLETED
           ? "completed"
-          : task.status === "Pending"
+          : task.status === TASK_STATUS.PENDING
           ? "pending"
           : "in-progress"
       }`}
@@ -89,6 +117,7 @@ const TaskItem = ({ task }) => {
             }
             required
           />
+
           <textarea
             value={editState.editDescription}
             onChange={(e) =>
@@ -100,9 +129,11 @@ const TaskItem = ({ task }) => {
             }
             required
           />
+
           <button type="submit" className="save-btn">
             Save
           </button>
+
           <button
             type="button"
             onClick={() => dispatchEdit({ type: "CANCEL_EDIT" })}
@@ -122,21 +153,28 @@ const TaskItem = ({ task }) => {
             value={task.status}
             onChange={(e) => changeStatus(e.target.value)}
           >
-            <option>Pending</option>
-            <option>In Progress</option>
-            <option>Completed</option>
+            {STATUS_OPTIONS.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
           </select>
 
           <select
             value={task.priority}
             onChange={(e) => changePriority(e.target.value)}
           >
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
+            {PRIORITY_OPTIONS.map((priority) => (
+              <option key={priority} value={priority}>
+                {priority}
+              </option>
+            ))}
           </select>
+
           <button
-            onClick={() => dispatch({ type: "DELETE_TASK", id: task.id })}
+            onClick={() =>
+              dispatch({ type: ACTION_TYPES.DELETE_TASK, id: task.id })
+            }
             className="delete-btn"
           >
             Delete
